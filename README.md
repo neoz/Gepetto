@@ -37,6 +37,9 @@ method with the corresponding provider.
   - mistralai/Mixtral-8x22B-Instruct-v0.1 (does not support renaming variables)
 - [Ollama](https://ollama.com/)
   - Any local model exposed through Ollama (will not appear if Ollama is not running)
+- [Gemini] (https://aistudio.google.com/)
+  - gemini-1.5-flash
+  - gemini-1.5-flash-002
 
 Adding support for additional models shouldn't be too difficult, provided whatever provider you're considering exposes
 an API similar to OpenAI's. Look into the `gepetto/models` folder for inspiration, or open an issue if you can't figure
