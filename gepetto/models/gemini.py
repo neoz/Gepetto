@@ -41,6 +41,7 @@ class Gemini(LanguageModel):
         if not api_key:
             raise ValueError("GEMINI_API_KEY environment variable not set")
         self.client = create_client()
+        self.chat=None
 
     @staticmethod
     def get_menu_name() -> str:
@@ -78,20 +79,29 @@ class Gemini(LanguageModel):
 
     def query_model(self, query, cb, additional_model_options=None):
         try:
-            conversation = query
+            # check if query is a list of dict, yes in chat mode
+            if isinstance(query, list):
+                # init self.chat if it is None
+                if self.chat is None:
+                    model = self.client.GenerativeModel(model_name=self.model, system_instruction= query[0]['content'])
+                    self.chat = model.start_chat(history=[])
+                response = self.chat.send_message(query[1]['content'])
+                ida_kernwin.execute_sync(functools.partial(cb, response=response.text),
+                                        ida_kernwin.MFF_WRITE)
+            else:
+                model = self.client.GenerativeModel(model_name=self.model)
+                conversation = query
+                # Gọi API Gemini
+                #print(f"\nConversation: {conversation}\n")
+                response = model.generate_content(contents=conversation)
+                
+                # fix response
+                resp_text = response.text.replace('```json\n', '').replace('```', '')
 
-            model = self.client.GenerativeModel(model_name=self.model)
-            # Gọi API Gemini
-            #print(f"\nConversation: {conversation}\n")
-            response = model.generate_content(contents=conversation)
-            
-            # fix response
-            resp_text = response.text.replace('```json\n', '').replace('```', '')
-
-            #print(f"\nResponse: {resp_text}\n")
-            
-            ida_kernwin.execute_sync(functools.partial(cb, response=resp_text),
-                                     ida_kernwin.MFF_WRITE)
+                #print(f"\nResponse: {resp_text}\n")
+                
+                ida_kernwin.execute_sync(functools.partial(cb, response=resp_text),
+                                        ida_kernwin.MFF_WRITE)
         except Exception as e:
             print(f"Error while calling Gemini API: {e}")
 
