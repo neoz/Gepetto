@@ -29,6 +29,15 @@ class Gemini(LanguageModel):
     Gemini language model class.
     """
 
+    # @staticmethod
+    # def supported_models():
+    #     return GEMINI_MODELS
+
+    @staticmethod
+    def is_configured_properly() -> bool:
+        # The plugin is configured properly if the API key is provided, otherwise it should not be shown.
+        return bool(gepetto.config.get_config("Gemini", "API_KEY", "GEMINI_API_KEY"))
+
     def __init__(self, model):
         """
         Initialize the Gemini model with the specified model name.
