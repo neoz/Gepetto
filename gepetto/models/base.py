@@ -3,7 +3,7 @@ import abc
 
 class LanguageModel(metaclass=abc.ABCMeta):
     @abc.abstractmethod
-    def query_model_async(self, query, cb, additional_model_options) -> None:
+    def query_model_async(self, query, cb, stream, additional_model_options) -> None:
         pass
 
     def __eq__(self, other):
@@ -20,4 +20,9 @@ class LanguageModel(metaclass=abc.ABCMeta):
     @staticmethod
     @abc.abstractmethod
     def get_menu_name() -> str:
+        pass
+
+    @staticmethod
+    @abc.abstractmethod
+    def is_configured_properly() -> bool:
         pass

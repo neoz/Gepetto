@@ -1,2 +1,5 @@
 /gepetto/models/__pycache__
-/.venv
+.idea
+.?venv
+__pycache__/
+*.py[cod]

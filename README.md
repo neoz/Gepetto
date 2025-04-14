@@ -31,12 +31,28 @@ method with the corresponding provider.
   - gpt-3.5-turbo-0125
   - gpt-4-turbo
   - gpt-4o (recommended for beginners)
-- [Groq](https://console.groq.com/playground)
-  -  llama3-70b-8192
-- [Together](https://api.together.ai/)
-  - mistralai/Mixtral-8x22B-Instruct-v0.1 (does not support renaming variables)
+- [Azure OpenAI](https://ai.azure.com/)
+  - gpt-35-turbo
+  - gpt-35-turbo-1106
+  - gpt-35-turbo-16k
+  - gpt-4-turbo
+  - gpt-4-turbo-2024-0409-gs
 - [Ollama](https://ollama.com/)
   - Any local model exposed through Ollama (will not appear if Ollama is not running)
+- [Groq](https://console.groq.com/playground)
+  - llama-3.1-70b-versatile
+  - llama-3.2-90b-text-preview
+  - mixtral-8x7b-32768
+- [Together](https://api.together.ai/)
+  - mistralai/Mixtral-8x22B-Instruct-v0.1 (does not support renaming variables)
+- [Novita AI](https://novita.ai/)
+  - deepseek/deepseek-r1
+  - deepseek/deepseek-v3
+  - meta-llama/llama-3.3-70b-instruct
+  - meta-llama/llama-3.1-70b-instruct
+  - meta-llama/llama-3.1-405b-instruct
+- [LM Studio](https://lmstudio.ai/)
+  - Any local model exposed through LM Studio (will not appear if LM Studio Developer server is not running)
 - [Gemini] (https://aistudio.google.com/)
   - gemini-1.5-flash
   - gemini-1.5-flash-002
@@ -65,7 +81,7 @@ Gepetto also provides a CLI interface you can use to ask questions to the LLM di
 
 The following hotkeys are available:
 
-- Ask the model to explain the function: `Ctrl` + `Alt` + `H`
+- Ask the model to explain the function: `Ctrl` + `Alt` + `G`
 - Request better names for the function's variables: `Ctrl` + `Alt` + `R`
 
 Initial testing shows that asking for better names works better if you ask for an explanation of the function first – I
