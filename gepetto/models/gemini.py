@@ -14,7 +14,8 @@ import gepetto.config
 
 GEMINI_15_FLASH = "gemini-1.5-flash"
 GEMINI_15_FLASH_002 = "gemini-1.5-flash-002"
-GEMINI_MODELS = [GEMINI_15_FLASH, GEMINI_15_FLASH_002]
+GEMINI_20_FLASH = "gemini-2.0-flash"
+GEMINI_MODELS = [GEMINI_15_FLASH, GEMINI_15_FLASH_002,GEMINI_20_FLASH]
 
 # Khởi tạo Gemini client
 def create_client():
