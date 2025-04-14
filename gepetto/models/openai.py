@@ -14,6 +14,7 @@ import gepetto.config
 GPT3_MODEL_NAME = "gpt-3.5-turbo-0125"
 GPT4_MODEL_NAME = "gpt-4-turbo"
 GPT4o_MODEL_NAME = "gpt-4o"
+GPT4o_MINI_MODEL_NAME = "gpt-4o-mini"
 
 
 class GPT(LanguageModel):
@@ -23,32 +24,36 @@ class GPT(LanguageModel):
 
     @staticmethod
     def supported_models():
-        return [GPT3_MODEL_NAME, GPT4_MODEL_NAME, GPT4o_MODEL_NAME]
+        return [GPT3_MODEL_NAME, GPT4_MODEL_NAME, GPT4o_MODEL_NAME, GPT4o_MINI_MODEL_NAME]
+
+    @staticmethod
+    def is_configured_properly() -> bool:
+        # The plugin is configured properly if the API key is provided, otherwise it should not be shown.
+        return bool(gepetto.config.get_config("OpenAI", "API_KEY", "OPENAI_API_KEY"))
 
     def __init__(self, model):
         self.model = model
         # Get API key
         api_key = gepetto.config.get_config("OpenAI", "API_KEY", "OPENAI_API_KEY")
         if not api_key:
-            print(_("Please edit the configuration file to insert your {api_provider} API key!")
-                  .format(api_provider="OpenAI"))
-            raise ValueError("No valid OpenAI API key found")
+            raise ValueError(_("Please edit the configuration file to insert your {api_provider} API key!")
+                             .format(api_provider="OpenAI"))
 
-        proxy = gepetto.config.get_config("OpenAI", "OPENAI_PROXY")
+        proxy = gepetto.config.get_config("Gepetto", "PROXY")
         base_url = gepetto.config.get_config("OpenAI", "BASE_URL", "OPENAI_BASE_URL")
 
         self.client = openai.OpenAI(
             api_key=api_key,
             base_url=base_url,
             http_client=_httpx.Client(
-                proxies=proxy,
+                proxy=proxy,
             ) if proxy else None
         )
 
     def __str__(self):
         return self.model
 
-    def query_model(self, query, cb, additional_model_options=None):
+    def query_model(self, query, cb, stream=False, additional_model_options=None):
         """
         Function which sends a query to a GPT-API-compatible model and calls a callback when the response is available.
         Blocks until the response is received
@@ -71,10 +76,19 @@ class GPT(LanguageModel):
             response = self.client.chat.completions.create(
                 model=self.model,
                 messages=conversation,
+                stream=stream,
                 **additional_model_options
             )
-            ida_kernwin.execute_sync(functools.partial(cb, response=response.choices[0].message.content),
-                                     ida_kernwin.MFF_WRITE)
+            if not stream:
+                ida_kernwin.execute_sync(functools.partial(cb, response=response.choices[0].message.content),
+                                         ida_kernwin.MFF_WRITE)
+            else:
+                for chunk in response:
+                    delta = chunk.choices[0].delta
+                    finished = chunk.choices[0].finish_reason
+                    content = delta.content if hasattr(delta, "content") else ""
+                    cb(content, finished)
+
         except openai.BadRequestError as e:
             # Context length exceeded. Determine the max number of tokens we can ask for and retry.
             m = re.search(r'maximum context length is \d+ tokens, however you requested \d+ tokens', str(e))
@@ -89,7 +103,7 @@ class GPT(LanguageModel):
 
     # -----------------------------------------------------------------------------
 
-    def query_model_async(self, query, cb, additional_model_options=None):
+    def query_model_async(self, query, cb, stream=False, additional_model_options=None):
         """
         Function which sends a query to {model} and calls a callback when the response is available.
         :param query: The request to send to {model}
@@ -97,7 +111,7 @@ class GPT(LanguageModel):
         :param additional_model_options: Additional parameters used when creating the model object. Typically, for
         OpenAI, response_format={"type": "json_object"}.
         """
-        t = threading.Thread(target=self.query_model, args=[query, cb, additional_model_options])
+        t = threading.Thread(target=self.query_model, args=[query, cb, stream, additional_model_options])
         t.start()
 
 gepetto.models.model_manager.register_model(GPT)
